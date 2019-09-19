@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class PetTextBox extends StatefulWidget {
   final BorderRadius cornerRadius;
-  final double width, height, wordSpacing;
+  final double width, height, wordSpacing, fontSize;
   final Color backgroundColor, accentColor, textColor;
   final String placeholder, fontFamily;
-  final Icon prefixIcon, suffixIcon;
+  final Icon prefixIcon;
   final TextInputType inputType;
   final EdgeInsets margin;
   final Duration duration;
-  final VoidCallback onClickSuffix;
   final TextBaseline textBaseline;
   final FontStyle fontStyle;
   final FontWeight fontWeight;
   final bool autofocus, autocorrect, enabled, obscureText, isShadow;
   final FocusNode focusNode;
   final int maxLength, minLines, maxLines;
-  final ValueChanged<String> onChanged, onSubmitted;
+  final ValueChanged<String> onChanged;
   final GestureTapCallback onTap;
   final Color hintColor;
+  final TextStyle hintStyle;
+  final List<TextInputFormatter> formatters;
+  final TextEditingController controller;
+  final TextCapitalization textCapitalization;
 
   const PetTextBox(
       {@required this.width,
       @required this.height,
       @required this.prefixIcon,
       @required this.inputType,
-      this.suffixIcon,
       this.duration = const Duration(milliseconds: 500),
       this.margin = const EdgeInsets.all(10),
       this.obscureText = false,
@@ -35,7 +38,6 @@ class PetTextBox extends StatefulWidget {
       this.accentColor = Colors.white,
       this.placeholder = "Placeholder",
       this.isShadow = true,
-      this.onClickSuffix,
       this.wordSpacing,
       this.textBaseline,
       this.fontFamily,
@@ -51,7 +53,11 @@ class PetTextBox extends StatefulWidget {
       this.minLines,
       this.onChanged,
       this.onTap,
-      this.onSubmitted})
+      this.hintStyle = const TextStyle(color: Colors.grey, fontSize: 17),
+      this.formatters,
+      this.controller,
+      this.textCapitalization = TextCapitalization.none,
+      this.fontSize = 15})
       : assert(width != null),
         assert(height != null),
         assert(prefixIcon != null),
@@ -76,9 +82,7 @@ class _PetTextBoxState extends State<PetTextBox> {
               ? [BoxShadow(color: Colors.grey, blurRadius: 2, spreadRadius: 1)]
               : BoxShadow(spreadRadius: 0, blurRadius: 0),
           borderRadius: widget.cornerRadius,
-          color: widget.suffixIcon == null
-              ? isFocus ? widget.accentColor : widget.backgroundColor
-              : widget.backgroundColor),
+          color: isFocus ? widget.accentColor : widget.backgroundColor),
       child: Stack(
         overflow: Overflow.visible,
         children: <Widget>[
@@ -97,43 +101,21 @@ class _PetTextBoxState extends State<PetTextBox> {
             ),
             top: -20,
           ),
-          widget.suffixIcon == null
-              ? Container()
-              : Align(
-                  alignment: Alignment.centerRight,
-                  child: AnimatedContainer(
-                    width: isFocus ? 500 : 40,
-                    height: isFocus ? widget.height : 40,
-                    margin: EdgeInsets.only(right: isFocus ? 0 : 7),
-                    duration: widget.duration,
-                    decoration: BoxDecoration(
-                      borderRadius: isFocus
-                          ? widget.cornerRadius
-                          : BorderRadius.all(Radius.circular(60)),
-                      color: widget.accentColor,
-                    ),
-                  ),
-                ),
-          widget.suffixIcon == null
-              ? Container()
-              : GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isFocus ? isFocus = false : isFocus = true;
-                      if (widget.onClickSuffix != null) {
-                        widget.onClickSuffix();
-                      }
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(right: 15),
-                    alignment: Alignment.centerRight,
-                    child: Icon(
-                      widget.suffixIcon.icon,
-                      color: widget.textColor,
-                    ),
-                  ),
-                ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AnimatedContainer(
+              width: isFocus ? 500 : 40,
+              height: isFocus ? widget.height : 40,
+              margin: EdgeInsets.only(right: isFocus ? 0 : 7),
+              duration: widget.duration,
+              decoration: BoxDecoration(
+                borderRadius: isFocus
+                    ? widget.cornerRadius
+                    : BorderRadius.all(Radius.circular(60)),
+                color: widget.accentColor,
+              ),
+            ),
+          ),
           Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -150,6 +132,7 @@ class _PetTextBoxState extends State<PetTextBox> {
                   child: Container(
                     margin: EdgeInsets.only(right: 50, top: 3),
                     child: TextField(
+                      textCapitalization: widget.textCapitalization,
                       cursorWidth: 2,
                       obscureText: widget.obscureText,
                       keyboardType: widget.inputType,
@@ -159,7 +142,7 @@ class _PetTextBoxState extends State<PetTextBox> {
                         fontWeight: widget.fontWeight,
                         wordSpacing: widget.wordSpacing,
                         textBaseline: widget.textBaseline,
-                        fontSize: 15,
+                        fontSize: widget.fontSize,
                         color: widget.textColor,
                       ),
                       autofocus: widget.autofocus,
@@ -178,20 +161,15 @@ class _PetTextBoxState extends State<PetTextBox> {
                           widget.onTap();
                         }
                       },
-                      onSubmitted: (t) {
-                        setState(() {
-                          isFocus = false;
-                        });
-                        widget.onSubmitted(t);
-                      },
                       textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
-                          hintStyle:
-                              TextStyle(color: Colors.grey, fontSize: 17),
+                          hintStyle: widget.hintStyle,
                           hintText: widget.placeholder,
                           border: InputBorder.none),
                       cursorColor:
-                          isFocus ? widget.accentColor : widget.backgroundColor,
+                          isFocus ? Colors.blue : widget.backgroundColor,
+                      inputFormatters: widget.formatters,
+                      controller: widget.controller,
                     ),
                   ),
                 ),
