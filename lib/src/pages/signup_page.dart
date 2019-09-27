@@ -325,8 +325,9 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   bool _validateEmail() {
-    //TODO
-    return true;
+    bool emailValid =
+        RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(_email);
+    return emailValid;
   }
 
   bool _validatePassword() {

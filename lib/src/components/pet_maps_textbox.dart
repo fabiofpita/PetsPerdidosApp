@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:google_maps_webservice/places.dart';
 
-class PetTextBox extends StatefulWidget {
+class PetMapsTextBox extends StatefulWidget {
   final BorderRadius cornerRadius;
   final double width, height, wordSpacing, fontSize;
   final Color backgroundColor, accentColor, textColor;
@@ -13,14 +18,9 @@ class PetTextBox extends StatefulWidget {
   final TextBaseline textBaseline;
   final FontStyle fontStyle;
   final FontWeight fontWeight;
-  final bool autofocus,
-      autocorrect,
-      enabled,
-      obscureText,
-      isShadow,
-      showPlaceHolder;
+  final bool autofocus, autocorrect, obscureText, isShadow, showPlaceHolder;
   final FocusNode focusNode;
-  final int maxLength, minLines, maxLines;
+
   final ValueChanged<String> onChanged;
   final GestureTapCallback onTap;
   final Color hintColor;
@@ -29,7 +29,7 @@ class PetTextBox extends StatefulWidget {
   final TextEditingController controller;
   final TextCapitalization textCapitalization;
 
-  const PetTextBox(
+  const PetMapsTextBox(
       {@required this.width,
       @required this.height,
       @required this.prefixIcon,
@@ -52,10 +52,6 @@ class PetTextBox extends StatefulWidget {
       this.autofocus = false,
       this.autocorrect = false,
       this.focusNode,
-      this.enabled = true,
-      this.maxLength,
-      this.maxLines,
-      this.minLines,
       this.onChanged,
       this.onTap,
       this.hintStyle = const TextStyle(color: Colors.grey, fontSize: 17),
@@ -70,10 +66,10 @@ class PetTextBox extends StatefulWidget {
         assert(inputType != null);
 
   @override
-  _PetTextBoxState createState() => _PetTextBoxState();
+  _PetMapsTextBoxState createState() => _PetMapsTextBoxState();
 }
 
-class _PetTextBoxState extends State<PetTextBox> {
+class _PetMapsTextBoxState extends State<PetMapsTextBox> {
   bool isFocus = false;
 
   @override
@@ -154,19 +150,23 @@ class _PetTextBoxState extends State<PetTextBox> {
                       autofocus: widget.autofocus,
                       autocorrect: widget.autocorrect,
                       focusNode: widget.focusNode,
-                      enabled: widget.enabled,
-                      //maxLength: widget.maxLength,
-
-                      maxLines: widget.maxLines,
-                      minLines: widget.minLines,
                       onChanged: widget.onChanged,
-                      onTap: () {
-                        setState(() {
-                          isFocus = true;
-                        });
-                        if (widget.onTap != null) {
-                          widget.onTap();
+                      onTap: () async {
+                        Prediction p;
+                        p = await PlacesAutocomplete.show(
+                            context: context,
+                            apiKey: kGoogleApiKey,
+                            hint: "Pesquisar",
+                            language: "pt_BR",
+                            onError: (error) =>
+                                print("ERROOOOOO: " + error.errorMessage));
+                        if (p != null) {
+                          widget.controller.text = p.description;
+                          widget.controller.value =
+                              TextEditingValue(text: p.placeId);
                         }
+
+                        displayPrediction(p);
                       },
                       textInputAction: TextInputAction.done,
                       decoration: widget.showPlaceHolder
@@ -190,5 +190,25 @@ class _PetTextBoxState extends State<PetTextBox> {
       ),
       duration: widget.duration,
     );
+  }
+
+  static String kGoogleApiKey = "AIzaSyBuPdghVz5wcSLSwWRvJbVs5qsTSd3wLl8";
+
+  GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
+
+  Future<Null> displayPrediction(Prediction p) async {
+    if (p != null) {
+      PlacesDetailsResponse detail =
+          await _places.getDetailsByPlaceId(p.placeId);
+
+      var placeId = p.placeId;
+      double lat = detail.result.geometry.location.lat;
+      double lng = detail.result.geometry.location.lng;
+
+      var address = await Geocoder.local.findAddressesFromQuery(p.description);
+
+      print(lat);
+      print(lng);
+    }
   }
 }

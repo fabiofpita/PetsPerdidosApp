@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/pages/login_page.dart';
+import 'package:petsperdidos/src/pages/register_lostpet.dart';
 
 import 'package:petsperdidos/src/service/authentication.dart';
 import 'package:petsperdidos/src/service/database.dart';
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     this._user = new User("", "", "", "");
 
-    db.getUsuarioById(this.userId).then((user) {
+    db.getUsuarioLogado().then((user) {
       if (user != null) {
         setState(() {
           this._user = user;
@@ -61,6 +62,16 @@ class _HomePageState extends State<HomePage> {
                   child: Text('Logout'),
                 ),
               ),
+              Center(
+                child: new RaisedButton(
+                  onPressed: () {
+                    auth.signOut();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => RegisterLostPet()));
+                  },
+                  child: Text('Perdido'),
+                ),
+              )
             ],
           )
         ],

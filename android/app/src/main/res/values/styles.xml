@@ -4,8 +4,9 @@
         <!-- Show a splash screen on the activity. Automatically removed when
              Flutter draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
-
+    <color name="blue">#2196F3</color>
     <string name="app_name">PetsPerdidos</string>
     <string name="facebook_app_id">367771020558791</string>
     <string name="fb_login_protocol_scheme">fb367771020558791</string>

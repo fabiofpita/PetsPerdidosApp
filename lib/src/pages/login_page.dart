@@ -195,9 +195,23 @@ class _LoginPageState extends State<LoginPage> {
                 fontWeight: FontWeight.bold,
                 color: Colors.white)),
         onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => SignUpPage()));
+          Navigator.push(context, _createRoute());
         });
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => SignUpPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(-1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        );
+      },
+    );
   }
 
   Widget _showForgotPasswordLabel() {
@@ -264,6 +278,7 @@ class _LoginPageState extends State<LoginPage> {
 
         bool userConfirmed = await auth.isEmailVerified();
         if (userConfirmed) {
+          await db.gravarUsuarioLocal(await db.getUsuarioById(id));
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => HomePage(
               userId: id,
@@ -318,6 +333,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (user != null) {
         await db.gravarUsuario(user);
+        await db.gravarUsuarioLocal(user);
 
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => HomePage(
@@ -337,6 +353,11 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
       _showModalMessage("Ocorreu um erro!", auth.getAuthenticationError(error));
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showModalMessage("Ocorreu um erro!", "Tente novamente mais tarde!");
     }
   }
 }

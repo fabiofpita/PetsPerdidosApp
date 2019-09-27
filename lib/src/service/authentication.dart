@@ -5,13 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:petsperdidos/src/model/user.dart';
 import 'package:http/http.dart' as http;
+import 'package:petsperdidos/src/service/database.dart';
 
 abstract class BaseAuth {
   Future<String> signIn(String email, String password);
 
   Future<String> signUp(String email, String password);
 
-  Future<FirebaseUser> getCurrentUser();
+  Future<User> getCurrentUser();
 
   Future<void> sendEmailVerification();
 
@@ -29,6 +30,7 @@ abstract class BaseAuth {
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final facebookLogin = FacebookLogin();
+  final Data db = new DataAcess();
 
   Future<String> signIn(String email, String password) async {
     String id = "";
@@ -55,9 +57,8 @@ class Auth implements BaseAuth {
     return id;
   }
 
-  Future<FirebaseUser> getCurrentUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    return user;
+  Future<User> getCurrentUser() async {
+    return db.getUsuarioLogado();
   }
 
   Future<void> signOut() async {
