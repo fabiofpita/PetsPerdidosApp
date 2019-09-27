@@ -1,4 +1,4 @@
-package com.example.petsperdidos
+package com.petsperdidos
 
 import android.os.Bundle
 
