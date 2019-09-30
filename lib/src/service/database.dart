@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:petsperdidos/src/model/foundpet.dart';
+import 'package:petsperdidos/src/model/lostpet.dart';
 import 'package:petsperdidos/src/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +16,10 @@ abstract class Data {
   Future<void> excluirUsuarioLocal();
 
   Future<User> getUsuarioLogado();
+
+  Future<void> gravarAnimalPerdido(LostPet lostPet);
+
+  Future<void> gravarAnimalEncontrado(FoundPet foundPet);
 }
 
 class DataAcess implements Data {
@@ -87,5 +93,40 @@ class DataAcess implements Data {
     } catch (error) {
       return null;
     }
+  }
+
+  @override
+  Future<void> gravarAnimalPerdido(LostPet lostPet) async {
+    await _firestoreInstance.collection('animaisPerdidos').add({
+      'titulo': lostPet.title,
+      'descricao': lostPet.description,
+      'tipo': lostPet.type,
+      'raca': lostPet.breed,
+      'nome': lostPet.name,
+      'cor': lostPet.color,
+      'recompensa': lostPet.reward,
+      'ultimoLocalVisto': lostPet.lastAdress,
+      'latitudeUltimoLocal': lostPet.latitudeLastAdress,
+      'longitudeUltimoLocal': lostPet.longitudeLastAdress,
+      'foto': lostPet.photoUrl
+    });
+  }
+
+  @override
+  Future<void> gravarAnimalEncontrado(FoundPet foundPet) async {
+    await _firestoreInstance
+        .collection('animaisEncontrados')
+        .document()
+        .setData({
+      'titulo': foundPet.title,
+      'descricao': foundPet.description,
+      'tipo': foundPet.type,
+      'raca': foundPet.breed,
+      'cor': foundPet.color,
+      'ultimoLocalVisto': foundPet.lastAdress,
+      'latitudeUltimoLocal': foundPet.latitudeLastAdress,
+      'longitudeUltimoLocal': foundPet.longitudeLastAdress,
+      'foto': foundPet.photoUrl
+    });
   }
 }

@@ -234,7 +234,7 @@ class _SignUpPageState extends State<SignUpPage> {
       _modalTitle,
       _modalMessage,
       onPressed: sucess
-          ? () => Navigator.push(
+          ? () => Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => LoginPage()))
           : null,
       alertType: AlertType.success,
@@ -318,7 +318,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   bool _validatePhoneNumber() {
-    if (_phone.length != 15) {
+    if (_phone.length <= 15) {
       return false;
     }
     return true;

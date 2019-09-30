@@ -28,10 +28,10 @@ class _RootPageState extends State<RootPage> {
     widget.auth.getCurrentUser().then((user) {
       setState(() {
         if (user != null) {
-          _userId = user?.id;
+          _userId = user?.uid;
         }
         authStatus =
-            user?.id == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
+            user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
       });
     });
   }
@@ -39,7 +39,7 @@ class _RootPageState extends State<RootPage> {
   void _onLoggedIn() {
     widget.auth.getCurrentUser().then((user) {
       setState(() {
-        _userId = user.id.toString();
+        _userId = user.uid.toString();
       });
     });
     setState(() {

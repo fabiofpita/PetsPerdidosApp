@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:petsperdidos/src/components/pet_alert.dart';
 import 'package:petsperdidos/src/components/pet_button.dart';
 import 'package:petsperdidos/src/components/pet_combobox.dart';
@@ -10,21 +9,19 @@ import 'package:petsperdidos/src/components/pet_imageloader.dart';
 import 'package:petsperdidos/src/components/pet_loading.dart';
 import 'package:petsperdidos/src/components/pet_maps_textbox.dart';
 import 'package:petsperdidos/src/components/pet_textbox.dart';
-import 'package:petsperdidos/src/model/lostpet.dart';
+import 'package:petsperdidos/src/model/foundpet.dart';
 import 'package:petsperdidos/src/pages/home_page.dart';
 import 'package:petsperdidos/src/service/authentication.dart';
 import 'package:petsperdidos/src/service/database.dart';
 import 'package:petsperdidos/src/service/storage.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-class RegisterLostPet extends StatefulWidget {
+class RegisterFoundPet extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _RegisterLostPet();
+  State<StatefulWidget> createState() => new _RegisterFoundPetState();
 }
 
-class _RegisterLostPet extends State<RegisterLostPet> {
-  final controller = MoneyMaskedTextController(
-      decimalSeparator: '.', thousandSeparator: ',', initialValue: 0);
+class _RegisterFoundPetState extends State<RegisterFoundPet> {
   bool _isLoading;
   String _errorMessage;
   String _title;
@@ -35,7 +32,6 @@ class _RegisterLostPet extends State<RegisterLostPet> {
   File _image;
   String _name;
   String _color;
-
   TextEditingController textController = new TextEditingController();
   final BaseAuth auth = new Auth();
 
@@ -64,7 +60,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
   Widget _showHeader() {
     final center = Center(
       child: Text(
-        'Cadastre um animal perdido',
+        'Cadastre um animal encontrado',
         style: TextStyle(
             color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
       ),
@@ -88,10 +84,8 @@ class _RegisterLostPet extends State<RegisterLostPet> {
           _showCombo(),
           _showBreed(),
           _showColor(),
-          _showName(),
           _showMapsText(),
-          _showReward(),
-          _showSignLostPetButton(),
+          _showSignfoundPetButton(),
           //_showImagePicker(),
         ],
       ),
@@ -280,36 +274,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
     );
   }
 
-  Widget _showName() {
-    final PetTextBox textBox = new PetTextBox(
-      width: 100,
-      height: 60,
-      prefixIcon: Icon(Icons.pets, color: Colors.blue),
-      inputType: TextInputType.text,
-      backgroundColor: Colors.white,
-      placeholder: 'Nome do animal',
-      textColor: Colors.black,
-      cornerRadius: BorderRadius.circular(5),
-      margin: EdgeInsets.fromLTRB(5, 0, 5, 25),
-      onChanged: (text) => setState(
-        () {
-          _name = text;
-        },
-      ),
-      hintStyle: _getHintTextStyle(),
-      formatters: [
-        LengthLimitingTextInputFormatter(30),
-      ],
-      textCapitalization: TextCapitalization.sentences,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
-      child: textBox,
-    );
-  }
-
-  Widget _showSignLostPetButton() {
+  Widget _showSignfoundPetButton() {
     final PetButton button = PetButton(
       onPressed: _validateAndSubmit,
       text: 'Cadastrar',
@@ -319,31 +284,6 @@ class _RegisterLostPet extends State<RegisterLostPet> {
     );
 
     return button;
-  }
-
-  Widget _showReward() {
-    final PetTextBox textBox = new PetTextBox(
-      width: 100,
-      height: 60,
-      prefixIcon: Icon(Icons.attach_money, color: Colors.blue),
-      inputType: TextInputType.numberWithOptions(signed: true, decimal: true),
-      backgroundColor: Colors.white,
-      placeholder: 'Recompensa',
-      textColor: Colors.black,
-      cornerRadius: BorderRadius.circular(5),
-      margin: EdgeInsets.fromLTRB(5, 0, 5, 25),
-      hintStyle: _getHintTextStyle(),
-      formatters: [
-        LengthLimitingTextInputFormatter(10),
-      ],
-      controller: controller,
-      textCapitalization: TextCapitalization.sentences,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
-      child: textBox,
-    );
   }
 
   void _validateAndSubmit() async {
@@ -356,24 +296,22 @@ class _RegisterLostPet extends State<RegisterLostPet> {
       try {
         final Storage storage = new StorageData();
 
-        LostPet lostPet = new LostPet();
-        lostPet.title = _title;
-        lostPet.description = _description;
-        lostPet.name = _name;
-        lostPet.type = _type;
-        lostPet.breed = _breed;
-        lostPet.color = _color;
-        lostPet.lastAdress = _adress;
-        lostPet.reward = controller.numberValue;
-        lostPet.photoUrl = await storage.gravarArquivo(_image);
+        FoundPet foundPet = new FoundPet();
+        foundPet.title = _title;
+        foundPet.description = _description;
+        foundPet.type = _type;
+        foundPet.breed = _breed;
+        foundPet.color = _color;
+        foundPet.lastAdress = _adress;
+        foundPet.photoUrl = await storage.gravarArquivo(_image);
 
         final Data db = new DataAcess();
 
-        await db.gravarAnimalPerdido(lostPet);
+        await db.gravarAnimalEncontrado(foundPet);
 
         _showModalMessage(
             "Cadastrado com sucesso!",
-            "Animal cadastrado com sucesso! Esperamos que encontre-o o mais rápido possível!",
+            "Animal cadastrado com sucesso! Obrigado por colaborar! Você é incrível e ajuda o mundo a ser um lugar melhor!",
             true);
       } catch (error) {
         _showModalMessage(
@@ -409,9 +347,6 @@ class _RegisterLostPet extends State<RegisterLostPet> {
       validate = false;
     } else if (_adress == null || _adress.isEmpty) {
       message = "Preencha o campo Último local visto corretemente";
-      validate = false;
-    } else if (_name == null || _name.isEmpty) {
-      message = "Preencha o campo Nome corretemente";
       validate = false;
     } else if (_color == null || _color.isEmpty) {
       message = "Preencha o campo Cor predominante corretemente";

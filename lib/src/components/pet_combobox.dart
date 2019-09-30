@@ -12,6 +12,7 @@ class PetComboBox extends StatefulWidget {
   final bool enabled, showHint;
   final TextStyle hintStyle, fontStyle;
   final List<String> items;
+  final ValueChanged<String> onChanged;
 
   const PetComboBox({
     @required this.width,
@@ -33,6 +34,7 @@ class PetComboBox extends StatefulWidget {
     this.showHint = true,
     this.items,
     this.fontStyle = const TextStyle(color: Colors.black, fontSize: 15),
+    this.onChanged,
   })  : assert(width != null),
         assert(height != null);
 
@@ -114,6 +116,7 @@ class _PetComboBoxState extends State<PetComboBox> {
                         setState(() {
                           _value = _text;
                         });
+                        widget.onChanged(_text);
                       },
                       style: widget.fontStyle,
                       value: _value,

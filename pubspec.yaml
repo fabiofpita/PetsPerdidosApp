@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   firebase_core: ^0.4.0+9
   firebase_auth: ^0.14.0+5
+  firebase_storage: ^3.0.6
   flutter_masked_text: ^0.8.0
   cloud_firestore: ^0.12.9+4 # add this line
   flutter_facebook_login: ^2.0.1
@@ -30,6 +31,7 @@ dependencies:
   google_maps_webservice: ^0.0.15
   geocoder: ^0.2.1
   shared_preferences: ^0.4.3
+  image_picker: ^0.6.1+4
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
@@ -56,6 +58,7 @@ flutter:
   #  - images/a_dot_ham.jpeg
   assets:
     - assets/sherlock-dog.png
+    - assets/credentials.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

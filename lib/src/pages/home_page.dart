@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/pages/login_page.dart';
+import 'package:petsperdidos/src/pages/register_foundpet.dart';
 import 'package:petsperdidos/src/pages/register_lostpet.dart';
+import 'package:petsperdidos/src/pages/userProfile_page.dart';
 
 import 'package:petsperdidos/src/service/authentication.dart';
 import 'package:petsperdidos/src/service/database.dart';
@@ -43,6 +45,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Pets Perdidos"),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text(_user.nome),
+              accountEmail: Text(_user.email),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor:
+                    Theme.of(context).platform == TargetPlatform.iOS
+                        ? Colors.blue
+                        : Colors.white,
+                child: Text(
+                  _user.nome.substring(0, 1) + _user.sobrenome.substring(0, 1),
+                  style: TextStyle(fontSize: 40.0),
+                ),
+              ),
+            ),
+            ListTile(
+              title: Text("Meus dados"),
+              trailing: Icon(Icons.account_box),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => UserProfilePage(
+                      user: _user,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text("Meus animais perdidos"),
+              trailing: Icon(Icons.pets),
+            ),
+            ListTile(
+              title: Text("Animais que encontrei"),
+              trailing: Icon(Icons.pets),
+            ),
+          ],
+        ),
+      ),
       body: Stack(
         children: <Widget>[
           Column(
@@ -70,6 +117,16 @@ class _HomePageState extends State<HomePage> {
                         builder: (context) => RegisterLostPet()));
                   },
                   child: Text('Perdido'),
+                ),
+              ),
+              Center(
+                child: new RaisedButton(
+                  onPressed: () {
+                    auth.signOut();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => RegisterFoundPet()));
+                  },
+                  child: Text('Encontrado'),
                 ),
               )
             ],

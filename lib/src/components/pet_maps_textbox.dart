@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class PetMapsTextBox extends StatefulWidget {
   final BorderRadius cornerRadius;
@@ -63,7 +63,9 @@ class PetMapsTextBox extends StatefulWidget {
       : assert(width != null),
         assert(height != null),
         assert(prefixIcon != null),
-        assert(inputType != null);
+        assert(
+          inputType != null,
+        );
 
   @override
   _PetMapsTextBoxState createState() => _PetMapsTextBoxState();
@@ -71,6 +73,25 @@ class PetMapsTextBox extends StatefulWidget {
 
 class _PetMapsTextBoxState extends State<PetMapsTextBox> {
   bool isFocus = false;
+  String _placeid;
+
+  get placeId {
+    return _placeid;
+  }
+
+  String apiKey;
+  GoogleMapsPlaces _places;
+
+  Future<String> _getApiKey() async {
+    String content = await rootBundle.loadString("assets/credentials.json");
+
+    var credentials = jsonDecode(content);
+
+    apiKey = credentials["googlePlacesApiKey"];
+    _places = GoogleMapsPlaces(apiKey: apiKey);
+
+    return credentials["googlePlacesApiKey"];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,18 +176,22 @@ class _PetMapsTextBoxState extends State<PetMapsTextBox> {
                         Prediction p;
                         p = await PlacesAutocomplete.show(
                             context: context,
-                            apiKey: kGoogleApiKey,
+                            apiKey: apiKey == null || apiKey.isEmpty
+                                ? await _getApiKey()
+                                : apiKey,
                             hint: "Pesquisar",
                             language: "pt_BR",
                             onError: (error) =>
                                 print("ERROOOOOO: " + error.errorMessage));
                         if (p != null) {
-                          widget.controller.text = p.description;
-                          widget.controller.value =
-                              TextEditingValue(text: p.placeId);
-                        }
+                          setState(() {
+                            _placeid = p.placeId;
+                          });
 
-                        displayPrediction(p);
+                          widget.controller.value =
+                              TextEditingValue(text: p.description);
+                          widget.onChanged(p.description);
+                        }
                       },
                       textInputAction: TextInputAction.done,
                       decoration: widget.showPlaceHolder
@@ -192,23 +217,19 @@ class _PetMapsTextBoxState extends State<PetMapsTextBox> {
     );
   }
 
-  static String kGoogleApiKey = "AIzaSyBuPdghVz5wcSLSwWRvJbVs5qsTSd3wLl8";
+  // Future<Null> displayPrediction(Prediction p) async {
+  //   if (p != null) {
+  //     PlacesDetailsResponse detail =
+  //         await _places.getDetailsByPlaceId(p.placeId);
 
-  GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
+  //     var placeId = p.placeId;
+  //     double lat = detail.result.geometry.location.lat;
+  //     double lng = detail.result.geometry.location.lng;
 
-  Future<Null> displayPrediction(Prediction p) async {
-    if (p != null) {
-      PlacesDetailsResponse detail =
-          await _places.getDetailsByPlaceId(p.placeId);
+  //     var address = await Geocoder.local.findAddressesFromQuery(p.description);
 
-      var placeId = p.placeId;
-      double lat = detail.result.geometry.location.lat;
-      double lng = detail.result.geometry.location.lng;
-
-      var address = await Geocoder.local.findAddressesFromQuery(p.description);
-
-      print(lat);
-      print(lng);
-    }
-  }
+  //     print(lat);
+  //     print(lng);
+  //   }
+  // }
 }
