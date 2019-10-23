@@ -11,6 +11,7 @@ import 'package:petsperdidos/src/components/pet_loading.dart';
 import 'package:petsperdidos/src/components/pet_maps_textbox.dart';
 import 'package:petsperdidos/src/components/pet_textbox.dart';
 import 'package:petsperdidos/src/model/lostpet.dart';
+import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/pages/home_page.dart';
 import 'package:petsperdidos/src/service/authentication.dart';
 import 'package:petsperdidos/src/service/database.dart';
@@ -18,11 +19,15 @@ import 'package:petsperdidos/src/service/storage.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RegisterLostPet extends StatefulWidget {
+  final User user;
+  RegisterLostPet({this.user});
   @override
-  State<StatefulWidget> createState() => new _RegisterLostPet();
+  State<StatefulWidget> createState() => new _RegisterLostPet(user: this.user);
 }
 
 class _RegisterLostPet extends State<RegisterLostPet> {
+  _RegisterLostPet({@required this.user});
+  User user;
   final controller = MoneyMaskedTextController(
       decimalSeparator: '.', thousandSeparator: ',', initialValue: 0);
   bool _isLoading;
@@ -35,6 +40,8 @@ class _RegisterLostPet extends State<RegisterLostPet> {
   File _image;
   String _name;
   String _color;
+  double _longitude;
+  double _latitude;
 
   TextEditingController textController = new TextEditingController();
   final BaseAuth auth = new Auth();
@@ -91,8 +98,8 @@ class _RegisterLostPet extends State<RegisterLostPet> {
           _showName(),
           _showMapsText(),
           _showReward(),
+          _showImagePicker(),
           _showSignLostPetButton(),
-          //_showImagePicker(),
         ],
       ),
     );
@@ -237,6 +244,16 @@ class _RegisterLostPet extends State<RegisterLostPet> {
           _adress = text;
         },
       ),
+      onLatChanged: (latitude) => setState(
+        () {
+          _latitude = latitude;
+        },
+      ),
+      onLngChanged: (longitude) => setState(
+        () {
+          _longitude = longitude;
+        },
+      ),
       hintStyle: _getHintTextStyle(),
       formatters: [
         LengthLimitingTextInputFormatter(30),
@@ -364,12 +381,17 @@ class _RegisterLostPet extends State<RegisterLostPet> {
         lostPet.breed = _breed;
         lostPet.color = _color;
         lostPet.lastAdress = _adress;
+        lostPet.latitudeLastAdress = _latitude;
+        lostPet.longitudeLastAdress = _longitude;
         lostPet.reward = controller.numberValue;
         lostPet.photoUrl = await storage.gravarArquivo(_image);
+        lostPet.user = this.user.id;
 
         final Data db = new DataAcess();
 
-        await db.gravarAnimalPerdido(lostPet);
+        lostPet = await db.gravarAnimalPerdido(lostPet);
+
+        user = await db.adicionarAnimalPerdidoUsuario(user, lostPet);
 
         _showModalMessage(
             "Cadastrado com sucesso!",
@@ -389,11 +411,19 @@ class _RegisterLostPet extends State<RegisterLostPet> {
   }
 
   Widget _showImagePicker() {
-    return PetImageLoader(
+    final PetImageLoader imagLoader = PetImageLoader(
       height: 60,
       width: 100,
       backgroundColor: Colors.white,
       hintText: 'Adicione uma foto',
+      onImageChanged: (image) => setState(() {
+        _image = image;
+      }),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 15.0),
+      child: imagLoader,
     );
   }
 
@@ -436,7 +466,13 @@ class _RegisterLostPet extends State<RegisterLostPet> {
       _modalMessage,
       onPressed: sucess
           ? () => Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomePage()))
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(
+                    userId: user.id,
+                  ),
+                ),
+              )
           : null,
       alertType: sucess ? AlertType.success : AlertType.error,
       titleColor: sucess ? Color.fromRGBO(26, 5, 178, 1) : Colors.red,

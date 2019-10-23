@@ -14,8 +14,36 @@ class FoundPet {
   double latitudeLastAdress;
   double longitudeLastAdress;
   String photoUrl;
+  String user;
 
   FoundPet();
+
+  FoundPet.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        title = json['titulo'],
+        description = json['descricao'],
+        type = json['tipo'],
+        breed = json['raca'],
+        color = json['cor'],
+        lastAdress = json['ultimoLocalVisto'],
+        latitudeLastAdress = json['latitudeUltimoLocal'],
+        longitudeLastAdress = json['longitudeUltimoLocal'],
+        photoUrl = json['foto'],
+        user = json['user'];
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'type': type,
+        'breed': breed,
+        'color': color,
+        'lastAdress': lastAdress,
+        'latitudeLastAdress': latitudeLastAdress,
+        'longitudeLastAdress': longitudeLastAdress,
+        'photoUrl': photoUrl,
+        'user': user,
+      };
 
   Future<void> setCoordinatesByPlaceId(String placeId) async {
     String content = await rootBundle.loadString("assets/credentials.json");

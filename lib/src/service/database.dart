@@ -17,9 +17,17 @@ abstract class Data {
 
   Future<User> getUsuarioLogado();
 
-  Future<void> gravarAnimalPerdido(LostPet lostPet);
+  Future<LostPet> gravarAnimalPerdido(LostPet lostPet);
 
-  Future<void> gravarAnimalEncontrado(FoundPet foundPet);
+  Future<FoundPet> gravarAnimalEncontrado(FoundPet foundPet);
+
+  Future<User> adicionarAnimalPerdidoUsuario(User user, LostPet lostPet);
+
+  Future<User> adicionarAnimalEncontradoUsuario(User user, FoundPet foundPet);
+
+  Future<List<LostPet>> buscarAnimaisPerdidos();
+
+  Future<List<FoundPet>> buscarAnimaisEncontrados();
 }
 
 class DataAcess implements Data {
@@ -75,7 +83,9 @@ class DataAcess implements Data {
   Future<User> getUsuarioLogado() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      Map<String, dynamic> mapa = json.decode(prefs.getString("currentUser"));
+      JsonCodec codec = new JsonCodec();
+      var json = prefs.getString("currentUser");
+      var mapa = codec.decode(json);
       User user;
 
       if (mapa != null) {
@@ -96,8 +106,9 @@ class DataAcess implements Data {
   }
 
   @override
-  Future<void> gravarAnimalPerdido(LostPet lostPet) async {
-    await _firestoreInstance.collection('animaisPerdidos').add({
+  Future<LostPet> gravarAnimalPerdido(LostPet lostPet) async {
+    DocumentReference doc =
+        await _firestoreInstance.collection('animaisPerdidos').add({
       'titulo': lostPet.title,
       'descricao': lostPet.description,
       'tipo': lostPet.type,
@@ -108,16 +119,19 @@ class DataAcess implements Data {
       'ultimoLocalVisto': lostPet.lastAdress,
       'latitudeUltimoLocal': lostPet.latitudeLastAdress,
       'longitudeUltimoLocal': lostPet.longitudeLastAdress,
-      'foto': lostPet.photoUrl
+      'foto': lostPet.photoUrl,
+      'user': lostPet.user
     });
+
+    lostPet.id = doc.documentID;
+
+    return lostPet;
   }
 
   @override
-  Future<void> gravarAnimalEncontrado(FoundPet foundPet) async {
-    await _firestoreInstance
-        .collection('animaisEncontrados')
-        .document()
-        .setData({
+  Future<FoundPet> gravarAnimalEncontrado(FoundPet foundPet) async {
+    DocumentReference doc =
+        await _firestoreInstance.collection('animaisEncontrados').add({
       'titulo': foundPet.title,
       'descricao': foundPet.description,
       'tipo': foundPet.type,
@@ -126,7 +140,81 @@ class DataAcess implements Data {
       'ultimoLocalVisto': foundPet.lastAdress,
       'latitudeUltimoLocal': foundPet.latitudeLastAdress,
       'longitudeUltimoLocal': foundPet.longitudeLastAdress,
-      'foto': foundPet.photoUrl
+      'foto': foundPet.photoUrl,
+      'user': foundPet.user,
     });
+
+    foundPet.id = doc.documentID;
+
+    return foundPet;
+  }
+
+  @override
+  Future<User> adicionarAnimalPerdidoUsuario(User user, LostPet lostPet) async {
+    user.addLostPet(lostPet);
+
+    await _firestoreInstance
+        .collection("usuarios")
+        .document(user.id)
+        .updateData({
+      'lostedPets': User.encondeLostedPetsToJson(user.lostPets),
+    });
+
+    return user;
+  }
+
+  @override
+  Future<User> adicionarAnimalEncontradoUsuario(
+      User user, FoundPet foundPet) async {
+    user.addFoundPet(foundPet);
+
+    await _firestoreInstance
+        .collection("usuarios")
+        .document(user.id)
+        .updateData({
+      'foundedPets': User.encondeFoundePetsToJson(user.foundedPets),
+    });
+
+    return user;
+  }
+
+  @override
+  Future<List<FoundPet>> buscarAnimaisEncontrados() async {
+    List<FoundPet> foundedPets = new List();
+    FoundPet _petAux;
+
+    CollectionReference collectionReference =
+        _firestoreInstance.collection("animaisEncontrados");
+
+    QuerySnapshot querySnapshots = await collectionReference.getDocuments();
+    List<DocumentSnapshot> documents = querySnapshots.documents;
+
+    for (var x = 0; x < documents.length; x++) {
+      _petAux = FoundPet.fromJson(documents[x].data);
+
+      foundedPets.add(_petAux);
+    }
+
+    return foundedPets;
+  }
+
+  @override
+  Future<List<LostPet>> buscarAnimaisPerdidos() async {
+    List<LostPet> lostPets = new List();
+    LostPet _petAux;
+
+    CollectionReference collectionReference =
+        _firestoreInstance.collection("animaisPerdidos");
+
+    QuerySnapshot querySnapshots = await collectionReference.getDocuments();
+    List<DocumentSnapshot> documents = querySnapshots.documents;
+
+    for (var x = 0; x < documents.length; x++) {
+      _petAux = LostPet.fromJson(documents[x].data);
+
+      lostPets.add(_petAux);
+    }
+
+    return lostPets;
   }
 }

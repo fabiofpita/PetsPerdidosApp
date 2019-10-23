@@ -11,15 +11,21 @@ class StorageData extends Storage {
 
   @override
   Future<String> gravarArquivo(File file) async {
-    String photoUrl = "";
-    if (file != null) {
-      final StorageUploadTask uploadTask = instance.ref().putFile(file);
+    try {
+      String photoUrl = "";
+      if (file != null) {
+        final StorageReference ref = FirebaseStorage.instance.ref().child(
+            new DateTime.now().millisecondsSinceEpoch.toString() + "pet.jpg");
+        final StorageUploadTask uploadTask = ref.putFile(file);
 
-      final StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+        final StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
 
-      photoUrl = await taskSnapshot.ref.getDownloadURL();
+        photoUrl = await taskSnapshot.ref.getDownloadURL();
+      }
+
+      return photoUrl;
+    } catch (error) {
+      throw error;
     }
-
-    return photoUrl;
   }
 }

@@ -10,6 +10,7 @@ import 'package:petsperdidos/src/components/pet_loading.dart';
 import 'package:petsperdidos/src/components/pet_maps_textbox.dart';
 import 'package:petsperdidos/src/components/pet_textbox.dart';
 import 'package:petsperdidos/src/model/foundpet.dart';
+import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/pages/home_page.dart';
 import 'package:petsperdidos/src/service/authentication.dart';
 import 'package:petsperdidos/src/service/database.dart';
@@ -17,11 +18,17 @@ import 'package:petsperdidos/src/service/storage.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RegisterFoundPet extends StatefulWidget {
+  final User user;
+  RegisterFoundPet({this.user});
   @override
-  State<StatefulWidget> createState() => new _RegisterFoundPetState();
+  State<StatefulWidget> createState() =>
+      new _RegisterFoundPetState(user: this.user);
 }
 
 class _RegisterFoundPetState extends State<RegisterFoundPet> {
+  _RegisterFoundPetState({@required this.user});
+  User user;
+
   bool _isLoading;
   String _errorMessage;
   String _title;
@@ -30,8 +37,10 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
   String _type;
   String _breed;
   File _image;
-  String _name;
   String _color;
+  double _latitude;
+  double _longitude;
+
   TextEditingController textController = new TextEditingController();
   final BaseAuth auth = new Auth();
 
@@ -85,8 +94,8 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
           _showBreed(),
           _showColor(),
           _showMapsText(),
+          _showImagePicker(),
           _showSignfoundPetButton(),
-          //_showImagePicker(),
         ],
       ),
     );
@@ -231,6 +240,16 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
           _adress = text;
         },
       ),
+      onLatChanged: (latitude) => setState(
+        () {
+          _latitude = latitude;
+        },
+      ),
+      onLngChanged: (longitude) => setState(
+        () {
+          _longitude = longitude;
+        },
+      ),
       hintStyle: _getHintTextStyle(),
       formatters: [
         LengthLimitingTextInputFormatter(30),
@@ -303,11 +322,15 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
         foundPet.breed = _breed;
         foundPet.color = _color;
         foundPet.lastAdress = _adress;
+        foundPet.latitudeLastAdress = _latitude;
+        foundPet.longitudeLastAdress = _longitude;
         foundPet.photoUrl = await storage.gravarArquivo(_image);
 
         final Data db = new DataAcess();
 
         await db.gravarAnimalEncontrado(foundPet);
+
+        user = await db.adicionarAnimalEncontradoUsuario(user, foundPet);
 
         _showModalMessage(
             "Cadastrado com sucesso!",
@@ -327,11 +350,19 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
   }
 
   Widget _showImagePicker() {
-    return PetImageLoader(
+    final PetImageLoader imagLoader = PetImageLoader(
       height: 60,
       width: 100,
       backgroundColor: Colors.white,
       hintText: 'Adicione uma foto',
+      onImageChanged: (image) => setState(() {
+        _image = image;
+      }),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
+      child: imagLoader,
     );
   }
 

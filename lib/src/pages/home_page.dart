@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:petsperdidos/src/components/pet_loading.dart';
 import 'package:petsperdidos/src/model/user.dart';
+import 'package:petsperdidos/src/pages/foundpet_page.dart';
 import 'package:petsperdidos/src/pages/login_page.dart';
+import 'package:petsperdidos/src/pages/lostpets_page.dart';
 import 'package:petsperdidos/src/pages/register_foundpet.dart';
 import 'package:petsperdidos/src/pages/register_lostpet.dart';
 import 'package:petsperdidos/src/pages/userProfile_page.dart';
@@ -21,33 +24,59 @@ class HomePage extends StatefulWidget {
       new _HomePageState(userId: this.userId);
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   _HomePageState({@required this.userId});
   final String userId;
   User _user;
   final BaseAuth auth = new Auth();
   final Data db = new DataAcess();
+  int _cIndex = 0;
+  String tabName;
+  List<Widget> _children = [];
 
   @override
   void initState() {
     this._user = new User("", "", "", "");
 
     db.getUsuarioLogado().then((user) {
-      if (user != null) {
-        setState(() {
-          this._user = user;
-        });
-      }
+      this._user = user;
+      setState(() {
+        this._children = [
+          LostPetsPage(
+            user: this._user,
+          ),
+          FoundPetsPage(
+            user: this._user,
+          ),
+        ];
+      });
     });
+
+    tabName = "Animais Perdidos";
+
     super.initState();
+  }
+
+  void _incrementTab(index) {
+    setState(() {
+      _cIndex = index;
+      tabName = index == 0 ? "Animais Perdidos" : "Animais Encontrados";
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pets Perdidos"),
+        title: Text(tabName),
       ),
+      body: _children == null || _children.isEmpty
+          ? Container(
+              color: Colors.white,
+              child: PetLoading(),
+            )
+          : _children[_cIndex],
       drawer: Drawer(
         child: ListView(
           children: <Widget>[
@@ -60,7 +89,12 @@ class _HomePageState extends State<HomePage> {
                         ? Colors.blue
                         : Colors.white,
                 child: Text(
-                  _user.nome.substring(0, 1) + _user.sobrenome.substring(0, 1),
+                  _user != null &&
+                          _user.nome.isNotEmpty &&
+                          _user.sobrenome.isNotEmpty
+                      ? _user.nome.substring(0, 1) +
+                          _user.sobrenome.substring(0, 1)
+                      : "",
                   style: TextStyle(fontSize: 40.0),
                 ),
               ),
@@ -82,58 +116,72 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               title: Text("Meus animais perdidos"),
               trailing: Icon(Icons.pets),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => RegisterLostPet(
+                      user: _user,
+                    ),
+                  ),
+                );
+              },
             ),
             ListTile(
               title: Text("Animais que encontrei"),
               trailing: Icon(Icons.pets),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => RegisterFoundPet(
+                      user: _user,
+                    ),
+                  ),
+                );
+              },
             ),
+            ListTile(
+                title: Text("Sair"),
+                trailing: Icon(Icons.exit_to_app),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  new Auth().signOut();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                })
           ],
         ),
       ),
-      body: Stack(
-        children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                child: Text("Olá " + _user.nome),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _cIndex,
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              title: new Text(
+                'Animais perdidos',
               ),
-              Center(
-                child: new RaisedButton(
-                  onPressed: () {
-                    auth.signOut();
-                    Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => LoginPage()));
-                  },
-                  child: Text('Logout'),
-                ),
-              ),
-              Center(
-                child: new RaisedButton(
-                  onPressed: () {
-                    auth.signOut();
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => RegisterLostPet()));
-                  },
-                  child: Text('Perdido'),
-                ),
-              ),
-              Center(
-                child: new RaisedButton(
-                  onPressed: () {
-                    auth.signOut();
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => RegisterFoundPet()));
-                  },
-                  child: Text('Encontrado'),
-                ),
-              )
-            ],
-          )
+              backgroundColor: Colors.white),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.priority_high,
+            ),
+            title: new Text(
+              'Animais encontrados',
+            ),
+            backgroundColor: Colors.white,
+          ),
         ],
+        backgroundColor: Colors.blue,
+        selectedLabelStyle: TextStyle(color: Colors.white),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white54,
+        showUnselectedLabels: true,
+        onTap: (index) {
+          _incrementTab(index);
+        },
       ),
-      backgroundColor: Colors.blue,
     );
   }
 }

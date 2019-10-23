@@ -22,6 +22,9 @@ class PetMapsTextBox extends StatefulWidget {
   final FocusNode focusNode;
 
   final ValueChanged<String> onChanged;
+  final ValueChanged<String> onPlaceIdChanged;
+  final ValueChanged<double> onLatChanged;
+  final ValueChanged<double> onLngChanged;
   final GestureTapCallback onTap;
   final Color hintColor;
   final TextStyle hintStyle;
@@ -29,38 +32,41 @@ class PetMapsTextBox extends StatefulWidget {
   final TextEditingController controller;
   final TextCapitalization textCapitalization;
 
-  const PetMapsTextBox(
-      {@required this.width,
-      @required this.height,
-      @required this.prefixIcon,
-      @required this.inputType,
-      this.duration = const Duration(milliseconds: 500),
-      this.margin = const EdgeInsets.all(10),
-      this.obscureText = false,
-      this.backgroundColor = const Color(0xff111823),
-      this.cornerRadius = const BorderRadius.all(Radius.circular(10)),
-      this.textColor = const Color(0xff5c5bb0),
-      this.accentColor = Colors.white,
-      this.placeholder = "Placeholder",
-      this.isShadow = true,
-      this.wordSpacing,
-      this.textBaseline,
-      this.fontFamily,
-      this.fontStyle,
-      this.fontWeight,
-      this.hintColor = Colors.white,
-      this.autofocus = false,
-      this.autocorrect = false,
-      this.focusNode,
-      this.onChanged,
-      this.onTap,
-      this.hintStyle = const TextStyle(color: Colors.grey, fontSize: 17),
-      this.formatters,
-      this.controller,
-      this.textCapitalization = TextCapitalization.none,
-      this.fontSize = 15,
-      this.showPlaceHolder = true})
-      : assert(width != null),
+  const PetMapsTextBox({
+    @required this.width,
+    @required this.height,
+    @required this.prefixIcon,
+    @required this.inputType,
+    this.duration = const Duration(milliseconds: 500),
+    this.margin = const EdgeInsets.all(10),
+    this.obscureText = false,
+    this.backgroundColor = const Color(0xff111823),
+    this.cornerRadius = const BorderRadius.all(Radius.circular(10)),
+    this.textColor = const Color(0xff5c5bb0),
+    this.accentColor = Colors.white,
+    this.placeholder = "Placeholder",
+    this.isShadow = true,
+    this.wordSpacing,
+    this.textBaseline,
+    this.fontFamily,
+    this.fontStyle,
+    this.fontWeight,
+    this.hintColor = Colors.white,
+    this.autofocus = false,
+    this.autocorrect = false,
+    this.focusNode,
+    this.onChanged,
+    this.onTap,
+    this.hintStyle = const TextStyle(color: Colors.grey, fontSize: 17),
+    this.formatters,
+    this.controller,
+    this.textCapitalization = TextCapitalization.none,
+    this.fontSize = 15,
+    this.showPlaceHolder = true,
+    this.onPlaceIdChanged,
+    this.onLatChanged,
+    this.onLngChanged,
+  })  : assert(width != null),
         assert(height != null),
         assert(prefixIcon != null),
         assert(
@@ -74,6 +80,8 @@ class PetMapsTextBox extends StatefulWidget {
 class _PetMapsTextBoxState extends State<PetMapsTextBox> {
   bool isFocus = false;
   String _placeid;
+  double latitude;
+  double longitude;
 
   get placeId {
     return _placeid;
@@ -184,13 +192,12 @@ class _PetMapsTextBoxState extends State<PetMapsTextBox> {
                             onError: (error) =>
                                 print("ERROOOOOO: " + error.errorMessage));
                         if (p != null) {
-                          setState(() {
-                            _placeid = p.placeId;
-                          });
-
                           widget.controller.value =
                               TextEditingValue(text: p.description);
                           widget.onChanged(p.description);
+                          //widget.onPlaceIdChanged(p.placeId);
+                          widget.onLatChanged(await getLatitude(p.placeId));
+                          widget.onLngChanged(await getLongitude(p.placeId));
                         }
                       },
                       textInputAction: TextInputAction.done,
@@ -215,6 +222,18 @@ class _PetMapsTextBoxState extends State<PetMapsTextBox> {
       ),
       duration: widget.duration,
     );
+  }
+
+  Future<double> getLatitude(String _placeId) async {
+    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(_placeId);
+    double lat = detail.result.geometry.location.lat;
+    return lat;
+  }
+
+  Future<double> getLongitude(String _placeId) async {
+    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(_placeId);
+    double lng = detail.result.geometry.location.lng;
+    return lng;
   }
 
   // Future<Null> displayPrediction(Prediction p) async {
