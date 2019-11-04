@@ -25,9 +25,9 @@ abstract class Data {
 
   Future<User> adicionarAnimalEncontradoUsuario(User user, FoundPet foundPet);
 
-  Future<List<LostPet>> buscarAnimaisPerdidos();
+  Future<List<LostPet>> buscarAnimaisPerdidos(int inicio);
 
-  Future<List<FoundPet>> buscarAnimaisEncontrados();
+  Future<List<FoundPet>> buscarAnimaisEncontrados(int inicio);
 }
 
 class DataAcess implements Data {
@@ -179,14 +179,17 @@ class DataAcess implements Data {
   }
 
   @override
-  Future<List<FoundPet>> buscarAnimaisEncontrados() async {
+  Future<List<FoundPet>> buscarAnimaisEncontrados(int inicio) async {
     List<FoundPet> foundedPets = new List();
     FoundPet _petAux;
 
-    CollectionReference collectionReference =
-        _firestoreInstance.collection("animaisEncontrados");
+    QuerySnapshot querySnapshots = await _firestoreInstance
+        .collection("animaisEncontrados")
+        .orderBy("titulo")
+        .startAt([inicio])
+        .limit(7)
+        .getDocuments();
 
-    QuerySnapshot querySnapshots = await collectionReference.getDocuments();
     List<DocumentSnapshot> documents = querySnapshots.documents;
 
     for (var x = 0; x < documents.length; x++) {
@@ -199,14 +202,16 @@ class DataAcess implements Data {
   }
 
   @override
-  Future<List<LostPet>> buscarAnimaisPerdidos() async {
+  Future<List<LostPet>> buscarAnimaisPerdidos(int inicio) async {
     List<LostPet> lostPets = new List();
     LostPet _petAux;
 
-    CollectionReference collectionReference =
-        _firestoreInstance.collection("animaisPerdidos");
-
-    QuerySnapshot querySnapshots = await collectionReference.getDocuments();
+    QuerySnapshot querySnapshots = await _firestoreInstance
+        .collection("animaisPerdidos")
+        .orderBy("titulo")
+        .startAt([inicio])
+        .limit(7)
+        .getDocuments();
     List<DocumentSnapshot> documents = querySnapshots.documents;
 
     for (var x = 0; x < documents.length; x++) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:petsperdidos/src/model/pet.dart';
 
 Positioned petCardDummy(
     DecorationImage img,
@@ -8,7 +9,8 @@ Positioned petCardDummy(
     double cardWidth,
     double rotation,
     double skew,
-    BuildContext context) {
+    BuildContext context,
+    Pet pet) {
   Size screenSize = MediaQuery.of(context).size;
   return Positioned(
     bottom: 10,
@@ -18,7 +20,7 @@ Positioned petCardDummy(
       child: Container(
         alignment: Alignment.center,
         width: screenSize.width - (screenSize.width * 0.1),
-        height: screenSize.height - 180,
+        height: screenSize.height - (screenSize.height * 0.27),
         decoration: BoxDecoration(
           color: Colors.blueAccent[100],
           borderRadius: BorderRadius.circular(8.0),
@@ -28,7 +30,7 @@ Positioned petCardDummy(
             Container(
               alignment: Alignment.center,
               child: Text(
-                "12345678901234567890123456789012345678901234567890",
+                pet.title,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 17,
@@ -40,7 +42,7 @@ Positioned petCardDummy(
               margin: EdgeInsets.fromLTRB(3, 10, 3, 10),
             ),
             Container(
-              width: screenSize.width / 1.2 + cardWidth,
+              width: screenSize.width - (screenSize.width * 0.1) - 10,
               height: screenSize.height / 2.2,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
@@ -52,7 +54,9 @@ Positioned petCardDummy(
             Container(
               height: 45,
               child: Text(
-                "Lorem ipsum",
+                pet.description.length >= 60
+                    ? pet.description.substring(0, 60) + "... Ver mais"
+                    : pet.description,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -62,7 +66,7 @@ Positioned petCardDummy(
               margin: EdgeInsets.fromLTRB(0, 10, 0, 2),
             ),
             Container(
-              width: screenSize.width / 1.2 + cardWidth,
+              width: screenSize.width - (screenSize.width * 0.1) - 10,
               alignment: Alignment.center,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

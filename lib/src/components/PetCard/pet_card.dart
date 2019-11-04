@@ -1,35 +1,36 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:petsperdidos/src/model/pet.dart';
 import 'package:petsperdidos/src/pages/detail_page.dart';
 
 Positioned petCard(
-    DecorationImage img,
-    double bottom,
-    double right,
-    double left,
-    double cardWidth,
-    double rotation,
-    double skew,
-    BuildContext context,
-    Function dismissImg,
-    int flag,
-    Function addImg,
-    Function swipeRight,
-    Function swipeLeft) {
+  DecorationImage img,
+  double bottom,
+  double right,
+  double left,
+  double cardWidth,
+  double rotation,
+  double skew,
+  BuildContext context,
+  Function dismissImg,
+  int flag,
+  Function addImg,
+  Function swipeRight,
+  Function swipeLeft,
+  Pet pet,
+) {
   Size screenSize = MediaQuery.of(context).size;
   return Positioned(
     bottom: 20,
     right: flag == 0 ? right != 0.0 ? right : null : null,
     left: flag == 1 ? right != 0.0 ? right : null : null,
     child: Dismissible(
-      key: Key(Random().toString()),
+      key: Key(UniqueKey().toString()),
       crossAxisEndOffset: -0.3,
       onDismissed: (DismissDirection direction) {
         if (direction == DismissDirection.endToStart)
-          dismissImg(img);
+          dismissImg(pet);
         else
-          addImg(img);
+          addImg(pet);
       },
       child: Transform(
         alignment: flag == 0 ? Alignment.bottomRight : Alignment.bottomLeft,
@@ -42,7 +43,10 @@ Positioned petCard(
             child: GestureDetector(
               onTap: () {
                 Navigator.of(context).push(new PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => new DetailPage(type: img),
+                  pageBuilder: (_, __, ___) => new DetailPage(
+                    type: img,
+                    pet: pet,
+                  ),
                 ));
               },
               child: Card(
@@ -51,7 +55,7 @@ Positioned petCard(
                 child: Container(
                   alignment: Alignment.center,
                   width: screenSize.width - (screenSize.width * 0.1),
-                  height: screenSize.height - 180,
+                  height: screenSize.height - (screenSize.height * 0.27),
                   decoration: BoxDecoration(
                     color: Colors.blueAccent[100],
                     borderRadius: BorderRadius.circular(8.0),
@@ -61,7 +65,7 @@ Positioned petCard(
                       Container(
                         alignment: Alignment.center,
                         child: Text(
-                          "12345678901234567890123456789012345678901234567890",
+                          pet.title,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 17,
@@ -73,7 +77,7 @@ Positioned petCard(
                         margin: EdgeInsets.fromLTRB(3, 10, 3, 10),
                       ),
                       Container(
-                        width: screenSize.width / 1.2 + cardWidth,
+                        width: screenSize.width - (screenSize.width * 0.1) - 10,
                         height: screenSize.height / 2.2,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
@@ -85,17 +89,21 @@ Positioned petCard(
                       Container(
                         height: 45,
                         child: Text(
-                          "Lorem ipsum",
+                          pet.description.length >= 60
+                              ? pet.description.substring(0, 60) +
+                                  "... Ver mais"
+                              : pet.description,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,
                             letterSpacing: 0.5,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                         margin: EdgeInsets.fromLTRB(0, 10, 0, 2),
                       ),
                       Container(
-                        width: screenSize.width / 1.2 + cardWidth,
+                        width: screenSize.width - (screenSize.width * 0.1) - 10,
                         alignment: Alignment.center,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -121,7 +129,13 @@ Positioned petCard(
                             FlatButton(
                                 padding: EdgeInsets.all(0.0),
                                 onPressed: () {
-                                  swipeRight();
+                                  Navigator.of(context)
+                                      .push(new PageRouteBuilder(
+                                    pageBuilder: (_, __, ___) => new DetailPage(
+                                      type: img,
+                                      pet: pet,
+                                    ),
+                                  ));
                                 },
                                 child: Container(
                                   height: 40.0,

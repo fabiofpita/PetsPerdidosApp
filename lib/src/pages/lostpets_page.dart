@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:petsperdidos/src/components/PetCard/pet_card.dart';
 import 'package:petsperdidos/src/components/PetCard/pet_dummyCard.dart';
 import 'package:petsperdidos/src/model/lostpet.dart';
+import 'package:petsperdidos/src/model/pet.dart';
 import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/service/database.dart';
 
@@ -25,6 +26,7 @@ class _LostPetsPageState extends State<LostPetsPage>
 
   final User user;
   int flag = 0;
+  int flagPaginacao = 0;
 
   AnimationController _buttonController;
   Animation<double> rotate;
@@ -32,7 +34,7 @@ class _LostPetsPageState extends State<LostPetsPage>
   Animation<double> bottom;
   Animation<double> width;
 
-  List<DecorationImage> data = [];
+  List<LostPet> data = [];
   List selectedData = [];
 
   void initState() {
@@ -104,16 +106,16 @@ class _LostPetsPageState extends State<LostPetsPage>
     } on TickerCanceled {}
   }
 
-  dismissImg(DecorationImage img) {
+  dismissImg(Pet pet) {
     setState(() {
-      data.remove(img);
+      data.remove(pet);
     });
   }
 
-  addImg(DecorationImage img) {
+  addImg(Pet pet) {
     setState(() {
-      data.remove(img);
-      selectedData.add(img);
+      data.remove(pet);
+      selectedData.add(pet);
     });
   }
 
@@ -134,26 +136,14 @@ class _LostPetsPageState extends State<LostPetsPage>
   }
 
   Future<List<LostPet>> findLostPets() async {
-    return await db.buscarAnimaisPerdidos();
+    return await db.buscarAnimaisPerdidos(flagPaginacao);
   }
 
   buildCards() async {
-    List<LostPet> foundedPets = await findLostPets();
-    List<DecorationImage> cards = new List<DecorationImage>();
-
-    foundedPets.forEach(
-      (pet) => cards.add(
-        new DecorationImage(
-          image: (pet.photoUrl == null || pet.photoUrl.isEmpty)
-              ? new ExactAssetImage('assets/sherlock-dog.png')
-              : new NetworkImage(pet.photoUrl),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
+    List<LostPet> lostPets = await findLostPets();
 
     setState(() {
-      data = cards;
+      data = lostPets;
     });
   }
 
@@ -186,31 +176,51 @@ class _LostPetsPageState extends State<LostPetsPage>
     List<Widget> cards = new List<Widget>();
     var dataLength = data.length;
     double initialBottom = 15.0;
-    double backCardPosition = initialBottom + (dataLength - 1) * 10 + 10;
+    double backCardPosition = initialBottom + (dataLength - 1) * 10;
     double backCardWidth = -10.0;
 
-    for (var x = 0; x < 4; x++) {
-      if (x == 3) {
+    for (var x = 0; x < dataLength; x++) {
+      if (x == dataLength - 1) {
         cards.add(petCard(
-            data[x],
-            bottom.value,
-            right.value,
-            0.0,
-            backCardWidth + 10,
-            rotate.value,
-            rotate.value < -10 ? 0.1 : 0.0,
-            context,
-            dismissImg,
-            flag,
-            addImg,
-            swipeRight,
-            swipeLeft));
+          new DecorationImage(
+            image: (data[x].photoUrl == null || data[x].photoUrl.isEmpty)
+                ? new ExactAssetImage('assets/sherlock-dog.png')
+                : new NetworkImage(data[x].photoUrl),
+            fit: BoxFit.cover,
+          ),
+          bottom.value,
+          right.value,
+          0.0,
+          backCardWidth + 10,
+          rotate.value,
+          rotate.value < -10 ? 0.1 : 0.0,
+          context,
+          dismissImg,
+          flag,
+          addImg,
+          swipeRight,
+          swipeLeft,
+          data[x],
+        ));
       } else {
         backCardPosition = backCardPosition - 10;
         backCardWidth = backCardWidth + 10;
 
-        cards.add(petCardDummy(data[x], backCardPosition, 0.0, 0.0,
-            backCardWidth, 0.0, 0.0, context));
+        cards.add(petCardDummy(
+            new DecorationImage(
+              image: (data[x].photoUrl == null || data[x].photoUrl.isEmpty)
+                  ? new ExactAssetImage('assets/sherlock-dog.png')
+                  : new NetworkImage(data[x].photoUrl),
+              fit: BoxFit.cover,
+            ),
+            backCardPosition,
+            0.0,
+            0.0,
+            backCardWidth,
+            0.0,
+            0.0,
+            context,
+            data[x]));
       }
     }
 

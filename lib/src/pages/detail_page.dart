@@ -1,41 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:petsperdidos/src/model/pet.dart';
+import 'package:petsperdidos/src/model/user.dart';
+import 'package:petsperdidos/src/service/database.dart';
+import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailPage extends StatefulWidget {
   final DecorationImage type;
-  const DetailPage({Key key, this.type}) : super(key: key);
+  final Pet pet;
+  const DetailPage({Key key, this.type, @required this.pet}) : super(key: key);
   @override
-  _DetailPageState createState() => new _DetailPageState(type: type);
+  _DetailPageState createState() => new _DetailPageState(type: type, pet: pet);
 }
 
 enum AppBarBehavior { normal, pinned, floating, snapping }
+enum TipoPet { perdido, encontrado }
 
 class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
   AnimationController _containerController;
   Animation<double> width;
   Animation<double> heigth;
   DecorationImage type;
-  _DetailPageState({this.type});
+  Pet pet;
+  _DetailPageState({this.type, this.pet});
 
   double screenWidth;
   double screenHeigth;
 
-  List data = [
-    DecorationImage(
-      image: ExactAssetImage('assets/sherlock-dog.png'),
-      fit: BoxFit.cover,
-    ),
-    DecorationImage(
-      image: NetworkImage(
-          "https://www.medicalnewstoday.com/content/images/articles/322/322868/golden-retriever-puppy.jpg"),
-      fit: BoxFit.cover,
-    ),
-    DecorationImage(
-      image: NetworkImage(
-          'https://www.nationalgeographic.com/content/dam/animals/thumbs/rights-exempt/mammals/d/domestic-dog_thumb.jpg'),
-      fit: BoxFit.cover,
-    ),
-  ];
   double _appBarHeight = 256.0;
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
@@ -79,7 +71,6 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     timeDilation = 0.7;
-    int img = data.indexOf(type);
     //print("detail");
     return new Theme(
       data: new ThemeData(
@@ -135,7 +126,14 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                 width: width.value,
                                 height: _appBarHeight,
                                 decoration: new BoxDecoration(
-                                  image: data[img],
+                                  image: new DecorationImage(
+                                    image: (pet.photoUrl == null ||
+                                            pet.photoUrl.isEmpty)
+                                        ? new ExactAssetImage(
+                                            'assets/sherlock-dog.png')
+                                        : new NetworkImage(pet.photoUrl),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ],
@@ -156,7 +154,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                       padding: const EdgeInsets.only(
                                           top: 0, bottom: 14.0),
                                       child: new Text(
-                                        "Animal encontrado próximo ao IFSP",
+                                        pet.title,
                                         style: new TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -165,14 +163,14 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                       ),
                                     ),
                                     new Text(
-                                      "Animal encontrado próximo ao IFSP. Bem dócil, com coleira. Está dentro do campus aos cuidados do pessoal da administração.",
+                                      pet.description,
                                     ),
                                     new Container(
                                       margin: new EdgeInsets.only(top: 25.0),
                                       padding: new EdgeInsets.only(
                                         bottom: 10.0,
                                       ),
-                                      height: 60.0,
+                                      height: 300,
                                       width: screenWidth,
                                       decoration: new BoxDecoration(
                                         color: Colors.white,
@@ -182,43 +180,81 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                         ),
                                       ),
                                       child: new Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
+                                          SizedBox(
+                                            height: 20,
+                                          ),
                                           new Text(
-                                            "Encontrado em",
+                                            "Visto por último em: " +
+                                                pet.lastAdress,
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                    new Container(
-                                      margin: new EdgeInsets.only(top: 10.0),
-                                      padding: new EdgeInsets.only(
-                                        bottom: 10.0,
-                                      ),
-                                      width: screenWidth,
-                                      height: 150,
-                                      decoration: new BoxDecoration(
-                                        color: Colors.white,
-                                        border: new Border(
-                                          top: new BorderSide(
-                                              color: Colors.black12),
-                                        ),
-                                      ),
-                                      child: new Column(
-                                        children: <Widget>[
                                           SizedBox(
                                             height: 10,
                                           ),
                                           new Text(
-                                            "Mais informações",
+                                            pet.type != null &&
+                                                    pet.type.isNotEmpty
+                                                ? "Tipo de animal: " + pet.type
+                                                : "",
                                             style: new TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(
+                                            height: pet.type != null &&
+                                                    pet.type.isNotEmpty
+                                                ? 10
+                                                : 0,
+                                          ),
+                                          new Text(
+                                            pet.breed != null &&
+                                                    pet.breed.isNotEmpty
+                                                ? "Raça: " + pet.breed
+                                                : "",
+                                            style: new TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          new Text(
+                                            pet.color != null &&
+                                                    pet.color.isNotEmpty
+                                                ? "Cor predominante: " +
+                                                    pet.color
+                                                : "",
+                                            style: new TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          new Text(
+                                            pet.reward != null &&
+                                                    !pet.reward.isNaN
+                                                ? "Recompensa: " +
+                                                    pet.reward.toString()
+                                                : "",
+                                            style: new TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(
+                                            height: pet.reward != null &&
+                                                    !pet.reward.isNaN
+                                                ? 10
+                                                : 0,
+                                          ),
+                                          new Text(
+                                            pet.name != null &&
+                                                    pet.name.isNotEmpty
+                                                ? "Atende pelo nome de: " +
+                                                    pet.name
+                                                : "",
+                                            style: new TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -244,17 +280,54 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                       children: <Widget>[
                         new FlatButton(
                           padding: new EdgeInsets.all(0.0),
-                          onPressed: () {},
+                          onPressed: () {
+                            String textShare = "";
+                            textShare += pet.title + "\n";
+                            textShare += pet.description + "\n";
+                            textShare +=
+                                pet.photoUrl.isNotEmpty && pet.photoUrl != null
+                                    ? "Você viu esse " +
+                                        pet.type +
+                                        "?\n" +
+                                        pet.photoUrl
+                                    : "";
+                            textShare +=
+                                "Se souber de alguma informação, por favor nos repasse!";
+                            Share.share(textShare);
+                          },
                           child: new Container(
                             height: 60.0,
-                            width: 300.0,
+                            width: 150,
                             alignment: Alignment.center,
                             decoration: new BoxDecoration(
                               color: Colors.orange,
                               borderRadius: new BorderRadius.circular(60.0),
                             ),
                             child: new Text(
-                              "Não conhece? Ajude compartilhando!",
+                              "Ajude compartilhando!",
+                              style: new TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        new FlatButton(
+                          padding: new EdgeInsets.all(0.0),
+                          onPressed: () async {
+                            Data db = DataAcess();
+                            User user = await db.getUsuarioById(pet.user);
+                            if (user != null && user.telefone != null) {
+                              launch('tel:' + user.telefone);
+                            }
+                          },
+                          child: new Container(
+                            height: 60.0,
+                            width: 150,
+                            alignment: Alignment.center,
+                            decoration: new BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: new BorderRadius.circular(60.0),
+                            ),
+                            child: new Text(
+                              "Contatar anunciante!",
                               style: new TextStyle(color: Colors.white),
                             ),
                           ),

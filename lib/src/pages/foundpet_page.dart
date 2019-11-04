@@ -25,6 +25,7 @@ class _FoundPetsPageState extends State<FoundPetsPage>
 
   final User user;
   int flag = 0;
+  int flagPaginacao = 0;
 
   AnimationController _buttonController;
   Animation<double> rotate;
@@ -32,7 +33,7 @@ class _FoundPetsPageState extends State<FoundPetsPage>
   Animation<double> bottom;
   Animation<double> width;
 
-  List<DecorationImage> data = [];
+  List<FoundPet> data = [];
   List selectedData = [];
 
   void initState() {
@@ -134,26 +135,26 @@ class _FoundPetsPageState extends State<FoundPetsPage>
   }
 
   Future<List<FoundPet>> findFoundedPets() async {
-    return await db.buscarAnimaisEncontrados();
+    return await db.buscarAnimaisEncontrados(flagPaginacao);
   }
 
   buildCards() async {
     List<FoundPet> foundedPets = await findFoundedPets();
-    List<DecorationImage> cards = new List<DecorationImage>();
+    //List<DecorationImage> cards = new List<DecorationImage>();
 
-    foundedPets.forEach(
-      (pet) => cards.add(
-        new DecorationImage(
-          image: (pet.photoUrl == null || pet.photoUrl.isEmpty)
-              ? new ExactAssetImage('assets/sherlock-dog.png')
-              : new NetworkImage(pet.photoUrl),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
+    // foundedPets.forEach(
+    //   (pet) => cards.add(
+    //     new DecorationImage(
+    //       image: (pet.photoUrl == null || pet.photoUrl.isEmpty)
+    //           ? new ExactAssetImage('assets/sherlock-dog.png')
+    //           : new NetworkImage(pet.photoUrl),
+    //       fit: BoxFit.cover,
+    //     ),
+    //   ),
+    // );
 
     setState(() {
-      data = cards;
+      data = foundedPets;
     });
   }
 
@@ -192,7 +193,12 @@ class _FoundPetsPageState extends State<FoundPetsPage>
     for (var x = 0; x < dataLength; x++) {
       if (x == dataLength - 1) {
         cards.add(petCard(
-            data[x],
+            new DecorationImage(
+              image: (data[x].photoUrl == null || data[x].photoUrl.isEmpty)
+                  ? new ExactAssetImage('assets/sherlock-dog.png')
+                  : new NetworkImage(data[x].photoUrl),
+              fit: BoxFit.cover,
+            ),
             bottom.value,
             right.value,
             0.0,
@@ -204,13 +210,27 @@ class _FoundPetsPageState extends State<FoundPetsPage>
             flag,
             addImg,
             swipeRight,
-            swipeLeft));
+            swipeLeft,
+            data[x]));
       } else {
         backCardPosition = backCardPosition - 10;
         backCardWidth = backCardWidth + 10;
 
-        cards.add(petCardDummy(data[x], backCardPosition, 0.0, 0.0,
-            backCardWidth, 0.0, 0.0, context));
+        cards.add(petCardDummy(
+            new DecorationImage(
+              image: (data[x].photoUrl == null || data[x].photoUrl.isEmpty)
+                  ? new ExactAssetImage('assets/sherlock-dog.png')
+                  : new NetworkImage(data[x].photoUrl),
+              fit: BoxFit.cover,
+            ),
+            backCardPosition,
+            0.0,
+            0.0,
+            backCardWidth,
+            0.0,
+            0.0,
+            context,
+            data[x]));
       }
     }
 

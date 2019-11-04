@@ -2,8 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:google_maps_webservice/places.dart';
+import './pet.dart';
 
-class LostPet {
+class LostPet extends Pet {
   String id;
   String title;
   String description;
