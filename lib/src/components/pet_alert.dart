@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:petsperdidos/src/components/pet_textbox.dart';
+import 'package:petsperdidos/src/model/pet.dart';
+import 'package:petsperdidos/src/pages/mypets_page.dart';
 import 'package:petsperdidos/src/service/authentication.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -106,7 +108,9 @@ class PetAlert {
         buttons: [
           DialogButton(
             onPressed: () {
-              if (_email != null && _email.isNotEmpty && validarEmail(_email)) {
+              if (_email != null &&
+                  _email.isNotEmpty &&
+                  _validarEmail(_email)) {
                 auth.sendResetPassword(_email);
                 Navigator.of(context).pop();
                 PetAlert.showAlert(
@@ -137,9 +141,61 @@ class PetAlert {
         ]).show();
   }
 
-  static bool validarEmail(String email) {
+  static bool _validarEmail(String email) {
     bool emailValid =
         RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
     return emailValid;
+  }
+
+  static showDeletePetAlert(BuildContext context, Function onClickExcluir,
+      Pet pet, TipoAnimal tipoAnimal) {
+    var alertStyle = AlertStyle(
+      animationType: AnimationType.grow,
+      isCloseButton: true,
+      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+      animationDuration: Duration(milliseconds: 500),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: Colors.black,
+        ),
+      ),
+      titleStyle: TextStyle(
+        color: Colors.red,
+      ),
+      constraints: BoxConstraints.expand(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width),
+    );
+
+    Alert(
+        context: context,
+        type: AlertType.none,
+        desc: "Deseja realmente excluir este pet?",
+        title: "Excluir Pet",
+        style: alertStyle,
+        buttons: [
+          DialogButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await onClickExcluir(pet, tipoAnimal);
+            },
+            child: Text(
+              "Excluir",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            color: Colors.red,
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text(
+              "Cancelar",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            color: Colors.grey,
+          )
+        ]).show();
   }
 }

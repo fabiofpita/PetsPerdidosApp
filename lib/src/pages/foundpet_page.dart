@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:petsperdidos/src/components/PetCard/pet_card.dart';
 import 'package:petsperdidos/src/components/PetCard/pet_dummyCard.dart';
 import 'package:petsperdidos/src/model/foundpet.dart';
+import 'package:petsperdidos/src/model/pet.dart';
 import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/service/database.dart';
 
@@ -105,16 +106,16 @@ class _FoundPetsPageState extends State<FoundPetsPage>
     } on TickerCanceled {}
   }
 
-  dismissImg(DecorationImage img) {
+  dismissImg(Pet pet) {
     setState(() {
-      data.remove(img);
+      data.remove(pet);
     });
   }
 
-  addImg(DecorationImage img) {
+  addImg(Pet pet) {
     setState(() {
-      data.remove(img);
-      selectedData.add(img);
+      data.remove(pet);
+      selectedData.add(pet);
     });
   }
 
@@ -140,18 +141,6 @@ class _FoundPetsPageState extends State<FoundPetsPage>
 
   buildCards() async {
     List<FoundPet> foundedPets = await findFoundedPets();
-    //List<DecorationImage> cards = new List<DecorationImage>();
-
-    // foundedPets.forEach(
-    //   (pet) => cards.add(
-    //     new DecorationImage(
-    //       image: (pet.photoUrl == null || pet.photoUrl.isEmpty)
-    //           ? new ExactAssetImage('assets/sherlock-dog.png')
-    //           : new NetworkImage(pet.photoUrl),
-    //       fit: BoxFit.cover,
-    //     ),
-    //   ),
-    // );
 
     setState(() {
       data = foundedPets;

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:petsperdidos/src/model/foundpet.dart';
 import 'package:petsperdidos/src/model/lostpet.dart';
 import 'package:petsperdidos/src/model/user.dart';
+import 'package:petsperdidos/src/pages/mypets_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class Data {
@@ -28,6 +29,12 @@ abstract class Data {
   Future<List<LostPet>> buscarAnimaisPerdidos(int inicio);
 
   Future<List<FoundPet>> buscarAnimaisEncontrados(int inicio);
+
+  Future<List<LostPet>> buscarAnimaisPerdidosByUser(String userId);
+
+  Future<List<FoundPet>> buscarAnimaisEncontradosByUser(String userId);
+
+  Future<void> excluirPet(String petId, TipoAnimal tipoAnimal);
 }
 
 class DataAcess implements Data {
@@ -61,6 +68,9 @@ class DataAcess implements Data {
     }
 
     user.id = id;
+
+    user.lostPets = await buscarAnimaisPerdidosByUser(user.id);
+    user.foundedPets = await buscarAnimaisEncontradosByUser(user.id);
 
     return user;
   }
@@ -97,6 +107,13 @@ class DataAcess implements Data {
         );
 
         user.id = mapa["id"];
+        if (mapa["lostPets"] != null) {
+          user.lostPets = mapa['lostPets'] as List<LostPet>;
+        }
+
+        if (mapa["foundedPets"] != null) {
+          user.foundedPets = List<FoundPet>.from(mapa["foundedPets"]);
+        }
       }
 
       return user;
@@ -107,21 +124,9 @@ class DataAcess implements Data {
 
   @override
   Future<LostPet> gravarAnimalPerdido(LostPet lostPet) async {
-    DocumentReference doc =
-        await _firestoreInstance.collection('animaisPerdidos').add({
-      'titulo': lostPet.title,
-      'descricao': lostPet.description,
-      'tipo': lostPet.type,
-      'raca': lostPet.breed,
-      'nome': lostPet.name,
-      'cor': lostPet.color,
-      'recompensa': lostPet.reward,
-      'ultimoLocalVisto': lostPet.lastAdress,
-      'latitudeUltimoLocal': lostPet.latitudeLastAdress,
-      'longitudeUltimoLocal': lostPet.longitudeLastAdress,
-      'foto': lostPet.photoUrl,
-      'user': lostPet.user
-    });
+    DocumentReference doc = await _firestoreInstance
+        .collection('animaisPerdidos')
+        .add(lostPet.toJson());
 
     lostPet.id = doc.documentID;
 
@@ -130,19 +135,9 @@ class DataAcess implements Data {
 
   @override
   Future<FoundPet> gravarAnimalEncontrado(FoundPet foundPet) async {
-    DocumentReference doc =
-        await _firestoreInstance.collection('animaisEncontrados').add({
-      'titulo': foundPet.title,
-      'descricao': foundPet.description,
-      'tipo': foundPet.type,
-      'raca': foundPet.breed,
-      'cor': foundPet.color,
-      'ultimoLocalVisto': foundPet.lastAdress,
-      'latitudeUltimoLocal': foundPet.latitudeLastAdress,
-      'longitudeUltimoLocal': foundPet.longitudeLastAdress,
-      'foto': foundPet.photoUrl,
-      'user': foundPet.user,
-    });
+    DocumentReference doc = await _firestoreInstance
+        .collection('animaisEncontrados')
+        .add(foundPet.toJson());
 
     foundPet.id = doc.documentID;
 
@@ -185,7 +180,7 @@ class DataAcess implements Data {
 
     QuerySnapshot querySnapshots = await _firestoreInstance
         .collection("animaisEncontrados")
-        .orderBy("titulo")
+        .orderBy("title")
         .startAt([inicio])
         .limit(7)
         .getDocuments();
@@ -194,7 +189,7 @@ class DataAcess implements Data {
 
     for (var x = 0; x < documents.length; x++) {
       _petAux = FoundPet.fromJson(documents[x].data);
-
+      _petAux.id = documents[x].documentID;
       foundedPets.add(_petAux);
     }
 
@@ -208,7 +203,7 @@ class DataAcess implements Data {
 
     QuerySnapshot querySnapshots = await _firestoreInstance
         .collection("animaisPerdidos")
-        .orderBy("titulo")
+        .orderBy("title")
         .startAt([inicio])
         .limit(7)
         .getDocuments();
@@ -216,10 +211,64 @@ class DataAcess implements Data {
 
     for (var x = 0; x < documents.length; x++) {
       _petAux = LostPet.fromJson(documents[x].data);
-
+      _petAux.id = documents[x].documentID;
       lostPets.add(_petAux);
     }
 
     return lostPets;
+  }
+
+  @override
+  Future<List<FoundPet>> buscarAnimaisEncontradosByUser(String userId) async {
+    List<FoundPet> foundedPets = new List();
+    FoundPet _petAux;
+
+    QuerySnapshot querySnapshots = await _firestoreInstance
+        .collection("animaisEncontrados")
+        .where("user", isEqualTo: userId)
+        .getDocuments();
+
+    List<DocumentSnapshot> documents = querySnapshots.documents;
+
+    for (var x = 0; x < documents.length; x++) {
+      _petAux = FoundPet.fromJson(documents[x].data);
+      _petAux.id = documents[x].documentID;
+      foundedPets.add(_petAux);
+    }
+
+    return foundedPets;
+  }
+
+  @override
+  Future<List<LostPet>> buscarAnimaisPerdidosByUser(String userId) async {
+    List<LostPet> lostPets = new List();
+    LostPet _petAux;
+
+    QuerySnapshot querySnapshots = await _firestoreInstance
+        .collection("animaisPerdidos")
+        .where("user", isEqualTo: userId)
+        .getDocuments();
+
+    List<DocumentSnapshot> documents = querySnapshots.documents;
+
+    for (var x = 0; x < documents.length; x++) {
+      _petAux = LostPet.fromJson(documents[x].data);
+      _petAux.id = documents[x].documentID;
+      lostPets.add(_petAux);
+    }
+
+    return lostPets;
+  }
+
+  @override
+  Future<void> excluirPet(String petId, TipoAnimal tipoAnimal) async {
+    DocumentReference documentReference = _firestoreInstance
+        .collection(tipoAnimal == TipoAnimal.encontrado
+            ? "animaisEncontrados"
+            : "animaisPerdidos")
+        .document(petId);
+    await Firestore.instance.runTransaction((Transaction myTransaction) async {
+      await myTransaction.delete(documentReference);
+    });
   }
 }

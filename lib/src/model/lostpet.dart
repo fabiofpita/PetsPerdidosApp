@@ -23,17 +23,17 @@ class LostPet extends Pet {
 
   LostPet.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        title = json['titulo'],
-        description = json['descricao'],
-        type = json['tipo'],
-        breed = json['raca'],
-        name = json['nome'],
-        color = json['cor'],
-        reward = json['recompensa'],
-        lastAdress = json['ultimoLocalVisto'],
-        latitudeLastAdress = json['latitudeUltimoLocal'],
-        longitudeLastAdress = json['longitudeUltimoLocal'],
-        photoUrl = json['foto'],
+        title = json['title'],
+        description = json['description'],
+        type = json['type'],
+        breed = json['breed'],
+        name = json['name'],
+        color = json['color'],
+        reward = json['reward'],
+        lastAdress = json['lastAdress'],
+        latitudeLastAdress = json['latitudeLastAdress'],
+        longitudeLastAdress = json['longitudeLastAdress'],
+        photoUrl = json['photoUrl'],
         user = json['user'];
 
   Map<String, dynamic> toJson() => {

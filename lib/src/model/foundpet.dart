@@ -21,15 +21,15 @@ class FoundPet extends Pet {
 
   FoundPet.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        title = json['titulo'],
-        description = json['descricao'],
-        type = json['tipo'],
-        breed = json['raca'],
-        color = json['cor'],
-        lastAdress = json['ultimoLocalVisto'],
-        latitudeLastAdress = json['latitudeUltimoLocal'],
-        longitudeLastAdress = json['longitudeUltimoLocal'],
-        photoUrl = json['foto'],
+        title = json['title'],
+        description = json['description'],
+        type = json['type'],
+        breed = json['breed'],
+        color = json['color'],
+        lastAdress = json['lastAdress'],
+        latitudeLastAdress = json['latitudeLastAdress'],
+        longitudeLastAdress = json['longitudeLastAdress'],
+        photoUrl = json['photoUrl'],
         user = json['user'];
 
   Map<String, dynamic> toJson() => {

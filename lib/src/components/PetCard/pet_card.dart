@@ -111,7 +111,7 @@ Positioned petCard(
                             FlatButton(
                                 padding: EdgeInsets.all(0.0),
                                 onPressed: () {
-                                  swipeLeft();
+                                  dismissImg(pet);
                                 },
                                 child: Container(
                                   height: 40.0,

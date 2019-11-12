@@ -45,6 +45,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   TextEditingController textController = new TextEditingController();
   final BaseAuth auth = new Auth();
+  Size _screenSize;
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   @override
   Widget build(BuildContext context) {
+    _screenSize = MediaQuery.of(context).size;
     return new Scaffold(
       backgroundColor: Colors.blue,
       body: Stack(
@@ -85,22 +87,24 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showBody() {
     return new Container(
-      padding: EdgeInsets.all(6.0),
-      child: new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          _showHeader(),
-          _showTitle(),
-          _showDescription(),
-          _showCombo(),
-          _showBreed(),
-          _showColor(),
-          _showName(),
-          _showMapsText(),
-          _showReward(),
-          _showImagePicker(),
-          _showSignLostPetButton(),
-        ],
+      width: _screenSize.width,
+      padding: EdgeInsets.all(6),
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            _showHeader(),
+            _showTitle(),
+            _showDescription(),
+            _showCombo(),
+            _showBreed(),
+            _showColor(),
+            _showName(),
+            _showMapsText(),
+            _showReward(),
+            _showImagePicker(),
+            _showSignLostPetButton(),
+          ],
+        ),
       ),
     );
   }
@@ -123,7 +127,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showTitle() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.label_important, color: Colors.blue),
       inputType: TextInputType.text,
@@ -152,7 +156,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showDescription() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 200,
       prefixIcon: Icon(Icons.info_outline, color: Colors.blue),
       maxLines: 10,
@@ -184,7 +188,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showCombo() {
     return PetComboBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(
         Icons.pets,
@@ -202,7 +206,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showBreed() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.pets, color: Colors.blue),
       inputType: TextInputType.text,
@@ -230,7 +234,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showMapsText() {
     final PetMapsTextBox textBox = new PetMapsTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.map, color: Colors.blue),
       inputType: TextInputType.text,
@@ -270,7 +274,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showColor() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.color_lens, color: Colors.blue),
       inputType: TextInputType.text,
@@ -299,7 +303,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showName() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.pets, color: Colors.blue),
       inputType: TextInputType.text,
@@ -329,9 +333,10 @@ class _RegisterLostPet extends State<RegisterLostPet> {
   Widget _showSignLostPetButton() {
     final PetButton button = PetButton(
       onPressed: _validateAndSubmit,
+      width: _screenSize.width * 95 / 100,
       text: 'Cadastrar',
       color: Colors.green,
-      padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
       textStyle: TextStyle(fontSize: 20.0, color: Colors.white),
     );
 
@@ -340,7 +345,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
 
   Widget _showReward() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.attach_money, color: Colors.blue),
       inputType: TextInputType.numberWithOptions(signed: true, decimal: true),
@@ -377,7 +382,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
         lostPet.title = _title;
         lostPet.description = _description;
         lostPet.name = _name;
-        lostPet.type = _type;
+        lostPet.type = _type == null || _type.isEmpty ? "Cachorro" : _type;
         lostPet.breed = _breed;
         lostPet.color = _color;
         lostPet.lastAdress = _adress;
@@ -413,7 +418,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
   Widget _showImagePicker() {
     final PetImageLoader imagLoader = PetImageLoader(
       height: 60,
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       backgroundColor: Colors.white,
       hintText: 'Adicione uma foto',
       onImageChanged: (image) => setState(() {

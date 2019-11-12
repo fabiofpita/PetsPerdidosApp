@@ -43,7 +43,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   TextEditingController textController = new TextEditingController();
   final BaseAuth auth = new Auth();
-
+  Size _screenSize;
   @override
   void initState() {
     _errorMessage = "";
@@ -55,6 +55,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   @override
   Widget build(BuildContext context) {
+    _screenSize = MediaQuery.of(context).size;
     return new Scaffold(
       backgroundColor: Colors.blue,
       body: Stack(
@@ -84,19 +85,20 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
   Widget _showBody() {
     return new Container(
       padding: EdgeInsets.all(6.0),
-      child: new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          _showHeader(),
-          _showTitle(),
-          _showDescription(),
-          _showCombo(),
-          _showBreed(),
-          _showColor(),
-          _showMapsText(),
-          _showImagePicker(),
-          _showSignfoundPetButton(),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            _showHeader(),
+            _showTitle(),
+            _showDescription(),
+            _showCombo(),
+            _showBreed(),
+            _showColor(),
+            _showMapsText(),
+            _showImagePicker(),
+            _showSignfoundPetButton(),
+          ],
+        ),
       ),
     );
   }
@@ -119,7 +121,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   Widget _showTitle() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.label_important, color: Colors.blue),
       inputType: TextInputType.text,
@@ -148,7 +150,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   Widget _showDescription() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 200,
       prefixIcon: Icon(Icons.info_outline, color: Colors.blue),
       maxLines: 10,
@@ -180,7 +182,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   Widget _showCombo() {
     return PetComboBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(
         Icons.pets,
@@ -198,7 +200,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   Widget _showBreed() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.pets, color: Colors.blue),
       inputType: TextInputType.text,
@@ -226,7 +228,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   Widget _showMapsText() {
     final PetMapsTextBox textBox = new PetMapsTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.map, color: Colors.blue),
       inputType: TextInputType.text,
@@ -266,7 +268,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
 
   Widget _showColor() {
     final PetTextBox textBox = new PetTextBox(
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       height: 60,
       prefixIcon: Icon(Icons.color_lens, color: Colors.blue),
       inputType: TextInputType.text,
@@ -296,6 +298,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
   Widget _showSignfoundPetButton() {
     final PetButton button = PetButton(
       onPressed: _validateAndSubmit,
+      width: _screenSize.width * 95 / 100,
       text: 'Cadastrar',
       color: Colors.green,
       padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -318,13 +321,14 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
         FoundPet foundPet = new FoundPet();
         foundPet.title = _title;
         foundPet.description = _description;
-        foundPet.type = _type;
+        foundPet.type = _type == null || _type.isEmpty ? "Cachorro" : _type;
         foundPet.breed = _breed;
         foundPet.color = _color;
         foundPet.lastAdress = _adress;
         foundPet.latitudeLastAdress = _latitude;
         foundPet.longitudeLastAdress = _longitude;
         foundPet.photoUrl = await storage.gravarArquivo(_image);
+        foundPet.user = this.user.id;
 
         final Data db = new DataAcess();
 
@@ -352,7 +356,7 @@ class _RegisterFoundPetState extends State<RegisterFoundPet> {
   Widget _showImagePicker() {
     final PetImageLoader imagLoader = PetImageLoader(
       height: 60,
-      width: 100,
+      width: _screenSize.width * 95 / 100,
       backgroundColor: Colors.white,
       hintText: 'Adicione uma foto',
       onImageChanged: (image) => setState(() {

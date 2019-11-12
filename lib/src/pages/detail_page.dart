@@ -132,7 +132,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                         ? new ExactAssetImage(
                                             'assets/sherlock-dog.png')
                                         : new NetworkImage(pet.photoUrl),
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.fitHeight,
                                   ),
                                 ),
                               ),

@@ -4,8 +4,7 @@ import 'package:petsperdidos/src/model/user.dart';
 import 'package:petsperdidos/src/pages/foundpet_page.dart';
 import 'package:petsperdidos/src/pages/login_page.dart';
 import 'package:petsperdidos/src/pages/lostpets_page.dart';
-import 'package:petsperdidos/src/pages/register_foundpet.dart';
-import 'package:petsperdidos/src/pages/register_lostpet.dart';
+import 'package:petsperdidos/src/pages/mypets_page.dart';
 import 'package:petsperdidos/src/pages/userProfile_page.dart';
 
 import 'package:petsperdidos/src/service/authentication.dart';
@@ -120,9 +119,8 @@ class _HomePageState extends State<HomePage>
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => RegisterLostPet(
-                      user: _user,
-                    ),
+                    builder: (context) =>
+                        MyPetPage(this._user, TipoAnimal.perdido),
                   ),
                 );
               },
@@ -134,9 +132,8 @@ class _HomePageState extends State<HomePage>
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => RegisterFoundPet(
-                      user: _user,
-                    ),
+                    builder: (context) =>
+                        MyPetPage(_user, TipoAnimal.encontrado),
                   ),
                 );
               },

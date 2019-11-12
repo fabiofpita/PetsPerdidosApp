@@ -48,7 +48,6 @@ class _PetComboBoxState extends State<PetComboBox> {
   @override
   void initState() {
     _value = "Cachorro";
-    widget.onChanged(_value);
     super.initState();
   }
 
