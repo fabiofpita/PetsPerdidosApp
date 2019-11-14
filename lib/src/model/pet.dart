@@ -12,4 +12,5 @@ abstract class Pet {
   String photoUrl;
   String user;
   double reward;
+  DateTime registerDate;
 }

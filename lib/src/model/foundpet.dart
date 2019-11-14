@@ -16,6 +16,7 @@ class FoundPet extends Pet {
   double longitudeLastAdress;
   String photoUrl;
   String user;
+  DateTime registerDate;
 
   FoundPet();
 
@@ -30,7 +31,9 @@ class FoundPet extends Pet {
         latitudeLastAdress = json['latitudeLastAdress'],
         longitudeLastAdress = json['longitudeLastAdress'],
         photoUrl = json['photoUrl'],
-        user = json['user'];
+        user = json['user'],
+        registerDate =
+            DateTime.fromMillisecondsSinceEpoch(json['registerDate']);
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -44,6 +47,7 @@ class FoundPet extends Pet {
         'longitudeLastAdress': longitudeLastAdress,
         'photoUrl': photoUrl,
         'user': user,
+        'registerDate': registerDate.millisecondsSinceEpoch
       };
 
   Future<void> setCoordinatesByPlaceId(String placeId) async {

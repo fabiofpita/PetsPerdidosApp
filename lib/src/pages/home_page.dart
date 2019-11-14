@@ -76,6 +76,7 @@ class _HomePageState extends State<HomePage>
               child: PetLoading(),
             )
           : _children[_cIndex],
+      key: new PageStorageKey(_cIndex),
       drawer: Drawer(
         child: ListView(
           children: <Widget>[

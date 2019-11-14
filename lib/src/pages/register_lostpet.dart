@@ -80,7 +80,7 @@ class _RegisterLostPet extends State<RegisterLostPet> {
     );
 
     return Container(
-      padding: EdgeInsets.all(2.0),
+      padding: EdgeInsets.fromLTRB(2, 20, 2, 2),
       child: center,
     );
   }

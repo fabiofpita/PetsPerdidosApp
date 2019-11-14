@@ -124,6 +124,8 @@ class DataAcess implements Data {
 
   @override
   Future<LostPet> gravarAnimalPerdido(LostPet lostPet) async {
+    lostPet.registerDate = DateTime.now();
+
     DocumentReference doc = await _firestoreInstance
         .collection('animaisPerdidos')
         .add(lostPet.toJson());
@@ -135,6 +137,8 @@ class DataAcess implements Data {
 
   @override
   Future<FoundPet> gravarAnimalEncontrado(FoundPet foundPet) async {
+    foundPet.registerDate = DateTime.now();
+
     DocumentReference doc = await _firestoreInstance
         .collection('animaisEncontrados')
         .add(foundPet.toJson());
@@ -180,7 +184,7 @@ class DataAcess implements Data {
 
     QuerySnapshot querySnapshots = await _firestoreInstance
         .collection("animaisEncontrados")
-        .orderBy("title")
+        .orderBy("registerDate")
         .startAt([inicio])
         .limit(7)
         .getDocuments();
@@ -203,7 +207,7 @@ class DataAcess implements Data {
 
     QuerySnapshot querySnapshots = await _firestoreInstance
         .collection("animaisPerdidos")
-        .orderBy("title")
+        .orderBy("registerDate")
         .startAt([inicio])
         .limit(7)
         .getDocuments();
